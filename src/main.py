@@ -1,3 +1,7 @@
+import json
+from datetime import datetime
+from pathlib import Path
+
 class A():
     def __init__(self, a1=1, a2=2, a3=3):
         self.a1 = a1
@@ -38,4 +42,24 @@ def get_x_eq_five(dict_list: list):
                 continue
             return x
     except StopIteration:
-        return {}
+        pass
+    return {}
+
+def change_date_format_and_save(json_file_location, save_dest = Path('../result.json')):
+    with open(json_file_location, 'r', encoding='utf-8') as source_file:
+        parsed_json_file = json.load(source_file)
+        source_file.close()
+    payee_id = parsed_json_file['payee']['id']
+    invoice_ids = parsed_json_file['invoiceIds']
+    print(f'payee.id = {payee_id}')
+    print(f'invoiceIds = {", ".join(_id for _id in invoice_ids if "583" in _id)}')
+    timestamp_attrs = 'claimDateTime', 'fileDateTime', 'receivedDateTime'
+    for attr in timestamp_attrs:
+        try:
+            datetime_obj = datetime.fromtimestamp(parsed_json_file[attr]/1e3)
+            parsed_json_file[attr] = datetime_obj.strftime('%Y-%m-%dT%H:%M:%S')
+        except KeyError:
+            continue
+    with open(save_dest, 'w', encoding='utf-8') as dest_file:
+        dest_file.write(json.dumps(parsed_json_file))
+        dest_file.close()

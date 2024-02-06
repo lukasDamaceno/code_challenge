@@ -1,6 +1,8 @@
 import inspect
+import json
+from pathlib import Path
 
-from src.main import A, B, get_even, get_x_eq_five
+from src.main import A, B, get_even, get_x_eq_five, change_date_format_and_save
 
 
 class TestQuestionOne:
@@ -16,7 +18,7 @@ class TestQuestionOne:
         class_methods = inspect.getmembers(self.a, predicate=inspect.isclass)
         result = len(class_methods), self.a.my_class_method()
         assert expected == result
-    
+
     def test_has_1_empty_instance_method(self):
         # note: had to implement this because inspect has no predicate compatible
         instance_methods = []
@@ -72,3 +74,35 @@ class TestQuestionFour:
         expected = {}
         result = get_x_eq_five(dict_list)
         assert result == expected
+
+class TestQuestionFive:
+    @staticmethod
+    def test_printed_messages(capsys):
+        sample_file_location = Path('sample.json')
+        dest_file_location = Path('test.json')
+        expected = 'payee.id = 9999', 'invoiceIds = XXA15839, XXA35832, XXA45830, XXA55831, XXA65833, XXA75834'
+        change_date_format_and_save(sample_file_location, save_dest=dest_file_location)
+        captured = capsys.readouterr()
+        result = tuple(filter(bool, captured.out.split('\n')))
+        assert result == expected
+
+    @staticmethod
+    def test_if_datetimes_are_iso_dates():
+        sample_file_location = Path('sample.json')
+        dest_file_location = Path('test.json')
+        expected = (
+            '2021-10-21T20:50:44',
+            '2021-10-21T20:50:44',
+            '2021-10-22T14:04:35'
+        )
+        change_date_format_and_save(sample_file_location, save_dest=dest_file_location)
+        with open(dest_file_location, 'r', encoding='utf-8') as dest_file:
+            parsed_file = json.load(dest_file)
+            result = (
+                parsed_file.get('claimDateTime'),
+                parsed_file.get('fileDateTime'),
+                parsed_file.get('receivedDateTime')
+            )
+            dest_file.close()
+        assert result == expected
+
