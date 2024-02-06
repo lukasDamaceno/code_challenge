@@ -1,6 +1,6 @@
 import inspect
 
-from src.main import A, B
+from src.main import A, B, get_even, get_x_eq_five
 
 
 class TestQuestionOne:
@@ -48,3 +48,27 @@ class TestQuestionTwo:
     def test_is_there_code_in_methods(self):
         results = self.b.my_instance_method(7), B.my_class_method()
         assert all(results)
+
+
+class TestQuestionThree:
+    @staticmethod
+    def test_get_even():
+        int_list = list(range(1, 9))
+        expected = [2, 4, 6, 8]
+        result = get_even(int_list)
+        assert expected == result
+
+class TestQuestionFour:
+    @staticmethod
+    def test_get_x_eq_five():
+        dict_list = [{'a': 1}, {'b': 2}, {'c': 3}, {'d': 4}, {'x': 5}]
+        expected = {'x': 5}
+        result = get_x_eq_five(dict_list)
+        assert result == expected
+
+    @staticmethod
+    def test_no_x_eq_five():
+        dict_list = [{'a': 1}, {'b': 2}, {'c': 3}, {'d': 4}, {'e': 5}]
+        expected = {}
+        result = get_x_eq_five(dict_list)
+        assert result == expected
